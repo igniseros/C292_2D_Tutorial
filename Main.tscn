@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://Assets/bg5.jpg" type="Texture" id=1]
 [ext_resource path="res://Assets/PNG/playerShip3_blue.png" type="Texture" id=2]
@@ -7,9 +7,53 @@
 [ext_resource path="res://ScoreText.gd" type="Script" id=5]
 [ext_resource path="res://Spawner.tscn" type="PackedScene" id=6]
 [ext_resource path="res://GameOverText.gd" type="Script" id=7]
+[ext_resource path="res://PowerUp_Spawner.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Lose Points.gd" type="Script" id=9]
+[ext_resource path="res://Assets/Lights/star_1.png" type="Texture" id=10]
+[ext_resource path="res://Assets/Lights/corona_0.png" type="Texture" id=11]
+[ext_resource path="res://Particles2D.tscn" type="PackedScene" id=12]
 
-[sub_resource type="CircleShape2D" id=1]
+[sub_resource type="CanvasItemMaterial" id=1]
+blend_mode = 1
+
+[sub_resource type="Gradient" id=2]
+colors = PoolColorArray( 0.0370408, 0.0351563, 1, 0.643137, 1, 1, 1, 0 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+flag_disable_z = true
+gravity = Vector3( 0, 5000, 0 )
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+scale = 0.75
+color_ramp = SubResource( 3 )
+
+[sub_resource type="CircleShape2D" id=5]
 radius = 23.7998
+
+[sub_resource type="CanvasItemMaterial" id=6]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id=7]
+
+[sub_resource type="Environment" id=8]
+background_mode = 4
+glow_enabled = true
+glow_levels/1 = true
+glow_levels/2 = true
+glow_levels/4 = true
+glow_levels/6 = true
+glow_levels/7 = true
+glow_intensity = 0.01
+glow_strength = 1.3
+glow_bloom = 0.5
+glow_blend_mode = 1
+glow_bicubic_upscale = true
+adjustment_enabled = true
+adjustment_contrast = 1.2
+adjustment_saturation = 1.5
 
 [node name="Main" type="Node2D"]
 
@@ -20,6 +64,10 @@ __meta__ = {
 "_edit_lock_": true
 }
 
+[node name="Particles2D" parent="." instance=ExtResource( 12 )]
+position = Vector2( 269.95, 353.384 )
+amount = 800
+
 [node name="Player" type="Node2D" parent="."]
 position = Vector2( 261.288, 870.582 )
 script = ExtResource( 3 )
@@ -27,7 +75,15 @@ __meta__ = {
 "_edit_group_": true
 }
 _laser_scene = ExtResource( 4 )
+_starting_laser = ExtResource( 4 )
 _laser_spawn_offset = Vector2( 0, -48 )
+
+[node name="Baddy Particles" type="Particles2D" parent="Player"]
+material = SubResource( 1 )
+lifetime = 0.1
+local_coords = false
+process_material = SubResource( 4 )
+texture = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="Player"]
 scale = Vector2( 0.75, 0.75 )
@@ -36,12 +92,23 @@ texture = ExtResource( 2 )
 [node name="Area2D" type="Area2D" parent="Player"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player/Area2D"]
-shape = SubResource( 1 )
+shape = SubResource( 5 )
 
-[node name="Spawner" parent="." instance=ExtResource( 6 )]
+[node name="Light2D" type="Light2D" parent="Player"]
+texture = ExtResource( 10 )
+texture_scale = 3.0
+energy = 0.5
+
+[node name="Light2D2" type="Light2D" parent="Player"]
+texture = ExtResource( 11 )
+texture_scale = 2.0
+energy = 0.5
+
+[node name="BadGuy_Spawner" parent="." instance=ExtResource( 6 )]
 position = Vector2( 251.764, 51.4831 )
 
 [node name="ScoreText" type="Label" parent="."]
+material = SubResource( 6 )
 margin_right = 117.0
 margin_bottom = 55.0
 script = ExtResource( 5 )
@@ -49,8 +116,15 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="PowerUp_Spawner" parent="." instance=ExtResource( 8 )]
+
+[node name="Lose_Points" type="Area2D" parent="."]
+script = ExtResource( 9 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Lose_Points"]
+shape = SubResource( 7 )
+
 [node name="GameOverText" type="Label" parent="."]
-visible = false
 margin_left = 86.0364
 margin_top = 413.845
 margin_right = 162.036
@@ -61,3 +135,28 @@ script = ExtResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Light2D" type="Light2D" parent="GameOverText"]
+texture = ExtResource( 10 )
+offset = Vector2( 40, 10 )
+texture_scale = 0.5
+color = Color( 1, 0, 0, 1 )
+energy = 1.3
+
+[node name="GameOverText2" type="Label" parent="GameOverText"]
+margin_left = 9.27581
+margin_top = 13.2002
+margin_right = 122.276
+margin_bottom = 27.2002
+rect_scale = Vector2( 0.5, 0.5 )
+text = "Press R to Restart"
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color( 0.454902, 0.454902, 0.454902, 1 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 8 )

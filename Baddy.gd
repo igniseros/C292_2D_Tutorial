@@ -1,5 +1,7 @@
 extends Node2D
 
+class_name BadGuy
+
 export var _speed : int = 10
 
 func _process(delta):
@@ -7,11 +9,16 @@ func _process(delta):
 
 
 func _on_Area2D_area_entered(other_area : Area2D):
-	other_area.get_parent().queue_free()
-	self.queue_free() # destroy
+	if(other_area.get_parent() is Proj):
+		(other_area.get_parent() as Proj).die()
+		GameState.increase_score(10)
+		self.queue_free() # destroy
 	
 	#increase score
-	GameState.increase_score(10)
 	
 	if (other_area.get_parent() is Player):
 		GameState.init_game_over()
+	
+	if (other_area.name == "Lose_Points"):
+		GameState.increase_score(-15)
+		self.queue_free()

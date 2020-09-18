@@ -1,4 +1,4 @@
-extends Node2D
+extends Proj
 
 export var _speed : int = 800
 
